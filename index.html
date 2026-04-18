@@ -49,12 +49,30 @@
             text-shadow: 0px 4px 12px rgba(0, 0, 0, 0.4);
             /* Slight drop shadow for contrast against lighter particles */
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            /* Stack vertically by default (mobile) */
+            align-items: center;
+        }
+
+        /* Go back to horizontal inline display for screens larger than 768px */
+        @media (min-width: 768px) {
+            .name-overlay {
+                flex-direction: row;
+                gap: 0.3em;
+                /* Space between words */
+                line-height: normal;
+                /* Restore normal line height */
+            }
         }
     </style>
 </head>
 
 <body>
-    <h1 class="name-overlay">drew<br>ratliff</h1>
+    <h1 class="name-overlay">
+        <span>drew</span>
+        <span>ratliff</span>
+    </h1>
     <script>
         // This is a p5.js sketch. It works almost exactly like Processing but in JavaScript!
         let particles = [];
