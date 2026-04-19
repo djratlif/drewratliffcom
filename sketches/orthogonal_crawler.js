@@ -16,9 +16,7 @@ function setup() {
 }
 
 function draw() {
-    // We add a very faint trailing effect to fade out extremely old lines,
-    // but keep it mostly permanent so you can watch complex grids build over time.
-    background(15, 23, 42, 3);
+    // No background fade, leaving lines 100% permanent and crisp.
 
     for (let w of walkers) {
         w.update();
