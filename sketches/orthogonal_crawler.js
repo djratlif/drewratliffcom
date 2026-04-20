@@ -42,13 +42,12 @@ class Walker {
         this.dir = floor(random(4));
         this.speed = gridScale;
 
-        // Pick a color from our custom neon palette
+        // Match the color scheme of the other sketches exactly (Cyan, Blue, Purple, Pink)
         let colors = [
-            color(236, 72, 153), // Pink
+            color(56, 189, 248), // Cyan
+            color(99, 102, 241), // Deep Blue
             color(168, 85, 247), // Purple
-            color(56, 189, 248), // Blue
-            color(52, 211, 153), // Emerald
-            color(255, 255, 255) // White
+            color(236, 72, 153)  // Pink
         ];
         this.baseColor = random(colors);
         this.weight = random(2, 5); // Crisp line thickness
