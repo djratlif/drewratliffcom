@@ -17,29 +17,60 @@
         html {
             margin: 0;
             padding: 0;
-            overflow: hidden;
-            /* Prevent scrollbars */
+            overflow-x: hidden;
+            /* Prevent horizontal scroll */
             background-color: #0f172a;
             /* Slate background */
+            font-family: sans-serif;
+            transition: background-color 1s ease;
         }
 
-        canvas {
+        /* -------------------------------------
+           SPLASH HEADER & CANVAS CONTAINER 
+        ---------------------------------------*/
+        #splash-header {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            /* crops out the rest of the canvas when shrunk */
+            background-color: transparent;
+            transition: height 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        #canvas-container canvas {
             display: block;
-            /* Remove default inline spacing */
         }
 
+        /* -------------------------------------
+           FOREGROUND TITLE OVERLAY 
+        ---------------------------------------*/
         .name-container {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             padding: 4rem 6rem;
-            background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.4) 40%, rgba(15, 23, 42, 0) 75%);
+            background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0.4) 40%, rgba(15, 23, 42, 0) 75%);
             z-index: 10;
-            pointer-events: none;
             display: flex;
             flex-direction: column;
             align-items: center;
+            cursor: pointer;
+            transition: all 1.2s cubic-bezier(0.77, 0, 0.175, 1), background 1s ease;
+        }
+
+        .name-container:hover {
+            transform: translate(-50%, -50%) scale(1.05);
         }
 
         .name-text {
@@ -54,12 +85,11 @@
             text-align: center;
             display: flex;
             flex-direction: column;
+            /* Stacked on mobile */
             align-items: center;
+            transition: font-size 1.2s ease, flex-direction 0s;
         }
 
-
-
-        /* Go back to horizontal inline display for screens larger than 768px */
         @media (min-width: 768px) {
             .name-text {
                 flex-direction: row;
@@ -67,34 +97,211 @@
                 line-height: normal;
             }
         }
+
+        /* -------------------------------------
+           MASTER DIVIDER LINE
+        ---------------------------------------*/
+        #master-divider {
+            position: absolute;
+            left: 0;
+            width: 0%;
+            /* Starts invisible at 0 width */
+            height: 4px;
+            background-color: white;
+            z-index: 20;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.4);
+            /* Transitions for drawing width, and smoothly tracking the morph */
+            transition: width 0.8s cubic-bezier(0.85, 0, 0.15, 1),
+                top 1.2s cubic-bezier(0.77, 0, 0.175, 1),
+                height 1.2s ease;
+        }
+
+        /* -------------------------------------
+           GENERIC PAGE CONTENT BELOW FOLD
+        ---------------------------------------*/
+        #page-content {
+            min-height: 100vh;
+            background-color: #000;
+            color: white;
+            padding: 4rem 2rem;
+            box-sizing: border-box;
+            display: none;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+        }
+
+        .content-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .content-container h2 {
+            font-family: 'Ponomar', serif;
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #333;
+            padding-bottom: 0.5rem;
+        }
+
+        .content-container p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #ccc;
+            margin-bottom: 2rem;
+        }
+
+        /* =========================================================================
+           ANIMATION TIMELINE CLASSES! 
+           ========================================================================= */
+
+        .sequence-active .name-container {
+            pointer-events: none;
+            /* Strip hover dynamics permanently after sequence starts */
+        }
+
+        /* STEP 1: Draw the white line accross 100vw */
+        .state-drawing-line #master-divider {
+            width: 100vw;
+        }
+
+        /* STEP 2: The screen natively fades to black */
+        .state-fade-black {
+            background-color: #000;
+        }
+
+        /* STEP 3: Header shrink & Translation */
+        .state-morph-header #splash-header {
+            height: 120px;
+        }
+
+        .state-morph-header .name-container {
+            /* Jump to top LEFT */
+            top: -10px;
+            left: -20px;
+            /* Shift it into the corner to counteract the padding */
+            right: auto;
+            transform: translate(0, 0) scale(1);
+            padding: 40px 60px;
+            /* Keep padding so the radial background has room to blur */
+            background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.5) 45%, rgba(15, 23, 42, 0) 75%);
+            cursor: default;
+        }
+
+        .state-morph-header .name-text {
+            font-size: 2.2rem;
+            flex-direction: row;
+            text-shadow: none;
+        }
+
+        /* Soften the master divider line in header mode */
+        .state-morph-header #master-divider {
+            height: 2px;
+            box-shadow: none;
+            background-color: white;
+        }
+
+        /* Step 3.5: Put main content onto DOM invisible */
+        .state-content-visible #page-content {
+            display: block;
+        }
+
+        /* STEP 4: Reveal generic content via opacity fade-in */
+        .state-content-fadein #page-content {
+            opacity: 1;
+        }
     </style>
 </head>
 
 <body>
-    <div class="name-container">
-        <h1 class="name-text">
-            <span>drew</span>
-            <span>ratliff</span>
-        </h1>
-    </div>
+
+    <!-- Hero / Header Area -->
+    <header id="splash-header">
+        <div id="canvas-container"></div>
+        <div class="name-container" id="title-btn">
+            <h1 class="name-text">
+                <span>drew</span>
+                <span>ratliff</span>
+            </h1>
+        </div>
+        <!-- Master screen-wide divider line tracking independently -->
+        <div id="master-divider"></div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="page-content">
+        <div class="content-container">
+            <h2>Welcome</h2>
+            <p>This is a completely generic placeholder for the main content of your website.</p>
+            <p>You can populate this with art galleries, project pages, bio info, contact forms, or whatever else you'd
+                like while the dynamic header art plays brilliantly above!</p>
+            <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+            <p>More standard vertical scrolling page content down here.</p>
+        </div>
+    </main>
 
     <script>
-        // List your different p5.js sketches here
-        // To add a new one in the future, just code it in the 'sketches' folder and add it to this list!
+        // --- DYNAMIC CANVAS INJECTION ---
         const visualFiles = [
             'sketches/particle_flow.js',
             'sketches/neon_waves.js',
             'sketches/moving_lines.js',
             'sketches/orthogonal_crawler.js'
         ];
-
-        // Pick one completely randomly
         const randomSketch = visualFiles[Math.floor(Math.random() * visualFiles.length)];
-
-        // Dynamically load that sketch into the page
         const scriptTag = document.createElement('script');
         scriptTag.src = randomSketch;
         document.body.appendChild(scriptTag);
+
+        // --- P5 CANVAS DOM REROUTING HACK ---
+        const checkCanvas = setInterval(() => {
+            const canvas = document.querySelector('canvas');
+            if (canvas && !canvas.closest('#canvas-container')) {
+                document.getElementById('canvas-container').appendChild(canvas);
+                clearInterval(checkCanvas);
+            }
+        }, 50);
+
+        // --- INTERACTIVE TIMELINE SCRIPT ---
+        const titleBtn = document.getElementById('title-btn');
+        const masterDivider = document.getElementById('master-divider');
+        let hasTransitioned = false;
+
+        titleBtn.addEventListener('click', () => {
+            if (hasTransitioned) return;
+            hasTransitioned = true;
+
+            // PRE-STEP: Calculate exactly where the bottom of the text is
+            // Set the master line to sit perfectly tight (2px) below it before it becomes visible!
+            const textRect = document.querySelector('.name-text').getBoundingClientRect();
+            masterDivider.style.top = (textRect.bottom + 2) + 'px';
+
+            // Force a DOM reflow so the starting top position registers before width expands
+            void masterDivider.offsetWidth;
+
+            document.body.classList.add('sequence-active');
+
+            // 1. Draw the white line across exactly 100vw
+            document.body.classList.add('state-drawing-line');
+
+            // 2. Wait 600ms, then trigger black body fade underneath the canvas
+            setTimeout(() => {
+                document.body.classList.add('state-fade-black');
+            }, 600);
+
+            // 3. Wait 1200ms, Morph header to top right + make main body visible on the DOM
+            setTimeout(() => {
+                document.body.classList.add('state-morph-header');
+                document.body.classList.add('state-content-visible');
+
+                // Keep the master divider pinned exactly to the bottom of the new 120px header
+                masterDivider.style.top = '118px';
+            }, 1200);
+
+            // 4. Wait 1800ms, gracefully fade in all typical website block content
+            setTimeout(() => {
+                document.body.classList.add('state-content-fadein');
+            }, 1800);
+        });
     </script>
 </body>
 
