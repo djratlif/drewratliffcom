@@ -28,47 +28,52 @@
             /* Remove default inline spacing */
         }
 
-        .name-overlay {
+        .name-container {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            padding: 4rem 6rem;
+            background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.4) 40%, rgba(15, 23, 42, 0) 75%);
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .name-text {
             font-family: 'Ponomar', 'Ruslan Display', 'UnifrakturMaguntia', serif;
             color: #ffffff;
             font-size: clamp(3rem, 6vw, 6rem);
             font-weight: 400;
             line-height: 0.85;
-            /* Tighter vertical spacing for line break */
             letter-spacing: -0.02em;
-            /* Tighter letter spacing */
             margin: 0;
-            padding: 4rem 6rem;
-            /* Add padding to give the background fade space to expand */
-            background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.4) 40%, rgba(15, 23, 42, 0) 75%);
-            text-decoration: underline;
-            text-underline-offset: 8px;
-            /* Offset to keep loops in Ponomar clear */
-            text-decoration-thickness: 1.5px;
-            z-index: 10;
-            pointer-events: none;
-            /* Allows the canvas to receive clicks if we add interaction later */
             text-shadow: 0px 4px 12px rgba(0, 0, 0, 0.4);
-            /* Slight drop shadow for contrast against lighter particles */
             text-align: center;
             display: flex;
             flex-direction: column;
-            /* Stack vertically by default (mobile) */
             align-items: center;
+        }
+
+        .name-underline {
+            width: 100%;
+            height: 5px;
+            /* Thick broken block line */
+            background-color: white;
+            margin-top: 15px;
+            /* Offset below the loops */
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.4);
+            border-radius: 2px;
         }
 
         /* Go back to horizontal inline display for screens larger than 768px */
         @media (min-width: 768px) {
-            .name-overlay {
+            .name-text {
                 flex-direction: row;
                 gap: 0.3em;
-                /* Space between words */
                 line-height: normal;
-                /* Restore normal line height */
             }
         }
     </style>
