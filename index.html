@@ -35,6 +35,8 @@
             overflow: hidden;
             /* crops out the rest of the canvas when shrunk */
             background-color: transparent;
+            z-index: 100;
+            /* Ensures inner elements like the hamburger stay visibly on top of the open side drawer */
             transition: height 1.2s cubic-bezier(0.77, 0, 0.175, 1);
         }
 
@@ -78,24 +80,17 @@
             color: #ffffff;
             font-size: clamp(3rem, 6vw, 6rem);
             font-weight: 400;
-            line-height: 0.85;
+            line-height: normal;
             letter-spacing: -0.02em;
             margin: 0;
             text-shadow: 0px 4px 12px rgba(0, 0, 0, 0.4);
             text-align: center;
             display: flex;
-            flex-direction: column;
-            /* Stacked on mobile */
+            flex-direction: row;
+            /* Always horizontal */
+            gap: 0.3em;
             align-items: center;
-            transition: font-size 1.2s ease, flex-direction 0s;
-        }
-
-        @media (min-width: 768px) {
-            .name-text {
-                flex-direction: row;
-                gap: 0.3em;
-                line-height: normal;
-            }
+            transition: font-size 1.2s ease;
         }
 
         /* -------------------------------------
@@ -150,6 +145,128 @@
             margin-bottom: 2rem;
         }
 
+        /* -------------------------------------
+           HAMBURGER NAVIGATION 
+        ---------------------------------------*/
+        .hamburger-menu {
+            position: absolute;
+            top: 45px;
+            right: 40px;
+            width: 35px;
+            height: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+            z-index: 20;
+            /* Hidden until the splash screen is passed */
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1.5s ease;
+        }
+
+        .hamburger-menu .bar {
+            width: 100%;
+            height: 4px;
+            background-color: white;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.6);
+            /* Helps contrast against bright canvas streaks */
+        }
+
+        .hamburger-menu:hover .bar {
+            background-color: #ffffff;
+            box-shadow: 0px 0px 15px rgba(255, 255, 255, 1);
+        }
+
+        /* -------------------------------------
+           SIDE DRAWER NAVIGATION 
+        ---------------------------------------*/
+        .nav-menu {
+            position: fixed;
+            /* Attach permanently to the viewport */
+            top: 0;
+            right: 0;
+            width: 250px;
+            height: 100vh;
+            /* Stretch to cover the entire right side of the screen */
+            background-color: rgba(15, 23, 42, 0.98);
+            border-left: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 180px 0 2rem 0;
+            /* Cleared asymmetrical left/right padding to perfectly horizontally center */
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* Middle mathematically justifies the links */
+            gap: 2rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+            transform: translateX(100px);
+            /* Start slightly off-screen to the right */
+            z-index: 50;
+            /* Sits securely underneath the header z-index */
+            box-shadow: -10px 0 25px rgba(0, 0, 0, 0.5);
+            /* Cast a soft shadow inward against the body */
+        }
+
+        .nav-menu.menu-open {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(0);
+            /* Glide smoothly into position perfectly flush with the right edge */
+        }
+
+        .nav-menu a {
+            font-family: 'Ponomar', 'Ruslan Display', 'UnifrakturMaguntia', serif;
+            color: #ccc;
+            text-decoration: none;
+            font-size: 1.4rem;
+            /* Slightly bumped up because decorative fonts read smaller */
+            text-align: center;
+
+            /* Start hidden and shifted right */
+            opacity: 0;
+            transform: translateX(30px);
+
+            /* Map transitions cleanly to prevent hover lag */
+            transition-property: color, text-shadow, opacity, transform;
+            transition-duration: 0.3s, 0.3s, 0.5s, 0.5s;
+            transition-timing-function: ease, ease, ease, cubic-bezier(0.77, 0, 0.175, 1);
+            transition-delay: 0s;
+            /* Reset all delays when menu is closed */
+        }
+
+        /* Slide them in securely with staggered delays! */
+        .nav-menu.menu-open a {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Map specific staggered delays to opacity and transform only */
+        .nav-menu.menu-open a:nth-child(1) {
+            transition-delay: 0s, 0s, 0.1s, 0.1s;
+        }
+
+        .nav-menu.menu-open a:nth-child(2) {
+            transition-delay: 0s, 0s, 0.2s, 0.2s;
+        }
+
+        .nav-menu.menu-open a:nth-child(3) {
+            transition-delay: 0s, 0s, 0.3s, 0.3s;
+        }
+
+        .nav-menu.menu-open a:nth-child(4) {
+            transition-delay: 0s, 0s, 0.4s, 0.4s;
+        }
+
+        .nav-menu a:hover {
+            color: #fff;
+            text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.8);
+        }
+
         /* =========================================================================
            ANIMATION TIMELINE CLASSES! 
            ========================================================================= */
@@ -189,7 +306,6 @@
 
         .state-morph-header .name-text {
             font-size: 2.2rem;
-            flex-direction: row;
             text-shadow: none;
         }
 
@@ -198,6 +314,12 @@
             height: 2px;
             box-shadow: none;
             background-color: white;
+        }
+
+        /* Fade in the hamburger menu to be clickable */
+        .state-morph-header .hamburger-menu {
+            opacity: 1;
+            pointer-events: auto;
         }
 
         /* Step 3.5: Put main content onto DOM invisible */
@@ -223,19 +345,33 @@
                 <span>ratliff</span>
             </h1>
         </div>
+
+        <!-- Hamburger Menu Top Right -->
+        <div class="hamburger-menu" id="nav-btn">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </div>
+
         <!-- Master screen-wide divider line tracking independently -->
         <div id="master-divider"></div>
     </header>
+
+    <!-- Navigation Dropdown Popup (Moved outside of header to prevent canvas crop clipping) -->
+    <nav class="nav-menu" id="nav-dropdown">
+        <a href="#">Galleries</a>
+        <a href="#">Projects</a>
+        <a href="#">About Me</a>
+        <a href="#">Contact</a>
+    </nav>
 
     <!-- Main Content Area -->
     <main id="page-content">
         <div class="content-container">
             <h2>Welcome</h2>
-            <p>This is a completely generic placeholder for the main content of your website.</p>
-            <p>You can populate this with art galleries, project pages, bio info, contact forms, or whatever else you'd
-                like while the dynamic header art plays brilliantly above!</p>
-            <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-            <p>More standard vertical scrolling page content down here.</p>
+            <p id="haiku-container"
+                style="white-space: pre-line; font-style: italic; font-size: 1.5rem; line-height: 2; padding-top: 1rem; color: #aaa;">
+            </p>
         </div>
     </main>
 
@@ -251,6 +387,14 @@
         const scriptTag = document.createElement('script');
         scriptTag.src = randomSketch;
         document.body.appendChild(scriptTag);
+
+        // --- RANDOM HAIKU LOGIC ---
+        const haikus = [
+            "Neon weaves in dark,\nCode blooming into beauty,\nScreen becomes alive.",
+            "Chaos framed in light,\nEndless threads of perfect math,\nArt without a hand.",
+            "Silent pixels wake,\nFlowing waves of liquid code,\nPainting something new."
+        ];
+        document.getElementById('haiku-container').innerText = haikus[Math.floor(Math.random() * haikus.length)];
 
         // --- P5 CANVAS DOM REROUTING HACK ---
         const checkCanvas = setInterval(() => {
@@ -301,6 +445,17 @@
             setTimeout(() => {
                 document.body.classList.add('state-content-fadein');
             }, 1800);
+        });
+
+        // --- NAVIGATION MENU TOGGLE ---
+        const navBtn = document.getElementById('nav-btn');
+        const navDropdown = document.getElementById('nav-dropdown');
+
+        navBtn.addEventListener('click', () => {
+            // Only allow interaction once the morph to the header is entirely complete
+            if (document.body.classList.contains('state-morph-header')) {
+                navDropdown.classList.toggle('menu-open');
+            }
         });
     </script>
 </body>
