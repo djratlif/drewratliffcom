@@ -51,6 +51,8 @@
 
         #canvas-container canvas {
             display: block;
+            /* Allow the canvas graphics to cleanly slide vertically whenever targeted */
+            transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1);
         }
 
         /* -------------------------------------
@@ -289,6 +291,11 @@
         /* STEP 3: Header shrink & Translation */
         .state-morph-header #splash-header {
             height: 120px;
+        }
+
+        /* Slide the entire massive canvas array upward to strictly perfectly align the graphic vertically so the exact middle sits securely inside the header! */
+        .state-morph-header #canvas-container canvas {
+            transform: translateY(calc(-60vh + 60px));
         }
 
         .state-morph-header .name-container {
