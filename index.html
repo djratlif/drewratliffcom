@@ -511,7 +511,7 @@
 
         navBtn.addEventListener('click', () => {
             // Only allow interaction once the morph to the header is entirely complete
-            if (document.body.classList.contains('state-morph-header')) {
+            if (isHomeButtonActive) {
                 navDropdown.classList.toggle('menu-open');
             }
         });
