@@ -5,6 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>drew ratliff</title>
+    <script>
+        // Extremely early head execution to permanently prevent visual Layout Flashes!
+        // Places state constraints purely on the HTML tag before the body text even exists.
+        if (window.location.search.includes('skip_splash=true')) {
+            // Prevent browsers from preserving scroll location so it snaps to the header
+            if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+            document.documentElement.classList.add('canvas-instant', 'skip-transitions', 'sequence-active', 'state-drawing-line', 'state-fade-black', 'state-morph-header', 'state-content-visible', 'state-content-fadein');
+        }
+        // Force scroll home
+        window.addEventListener('load', () => window.scrollTo(0, 0));
+    </script>
     <!-- Include p5.js, the web equivalent of Processing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,6 +24,7 @@
         href="https://fonts.googleapis.com/css2?family=Ponomar&family=Ruslan+Display&family=UnifrakturMaguntia&display=swap"
         rel="stylesheet">
     <style>
+        body,
         body,
         html {
             margin: 0;
@@ -23,6 +35,23 @@
             /* Slate background */
             font-family: sans-serif;
             transition: background-color 1s ease;
+        }
+
+        /* Force-kills all transition animations for instantaneous loading */
+        .skip-transitions * {
+            transition: none !important;
+        }
+
+        /* Permanently overrides canvas slide-in lag if the P5 network script loads too slowly on hot reloads */
+        .canvas-instant #canvas-container canvas {
+            transition: none !important;
+        }
+
+        /* Protects against a single-frame flash when P5 originally instantiates rawly into the DOM before its container is ready */
+        canvas:not(#canvas-container canvas) {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
         }
 
         /* -------------------------------------
@@ -284,8 +313,9 @@
         }
 
         /* STEP 2: The screen natively fades to black */
-        .state-fade-black {
-            background-color: #000;
+        .state-fade-black,
+        .state-fade-black body {
+            background-color: #000 !important;
         }
 
         /* STEP 3: Header shrink & Translation */
@@ -308,7 +338,9 @@
             padding: 40px 60px;
             /* Keep padding so the radial background has room to blur */
             background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.5) 45%, rgba(15, 23, 42, 0) 75%);
-            cursor: default;
+            cursor: pointer;
+            pointer-events: auto;
+            /* Restores the ability to physically click the link after the morph finishes! */
         }
 
         .state-morph-header .name-text {
@@ -318,6 +350,8 @@
 
         /* Soften the master divider line in header mode */
         .state-morph-header #master-divider {
+            top: 118px !important;
+            /* CSS gracefully hijacks the JS tracking and permanently links the border to the 120px header mark! */
             height: 2px;
             box-shadow: none;
             background-color: white;
@@ -416,8 +450,27 @@
         const titleBtn = document.getElementById('title-btn');
         const masterDivider = document.getElementById('master-divider');
         let hasTransitioned = false;
+        let isHomeButtonActive = false; // Flag safely blocks accidental refresh double-clicks mid-animation
+
+        // --- INSTANT LOAD HOMEPAGE LOGIC ---
+        if (window.location.search.includes('skip_splash=true')) {
+            // Flags to skip processing click animations 
+            hasTransitioned = true;
+            isHomeButtonActive = true;
+
+            // Strip the transition block safely after the DOM resolves so hover effects aren't permanently broken!
+            setTimeout(() => {
+                document.documentElement.classList.remove('skip-transitions');
+            }, 100);
+        }
 
         titleBtn.addEventListener('click', () => {
+            // Once the entire sequence completes, this button permanently morphs into a Home link!
+            if (isHomeButtonActive) {
+                window.location.href = window.location.pathname + '?skip_splash=true';
+                return;
+            }
+
             if (hasTransitioned) return;
             hasTransitioned = true;
 
@@ -439,18 +492,16 @@
                 document.body.classList.add('state-fade-black');
             }, 600);
 
-            // 3. Wait 1200ms, Morph header to top right + make main body visible on the DOM
+            // 3. Wait 1200ms, Morph header to top left + make main body visible on the DOM
             setTimeout(() => {
                 document.body.classList.add('state-morph-header');
                 document.body.classList.add('state-content-visible');
-
-                // Keep the master divider pinned exactly to the bottom of the new 120px header
-                masterDivider.style.top = '118px';
             }, 1200);
 
             // 4. Wait 1800ms, gracefully fade in all typical website block content
             setTimeout(() => {
                 document.body.classList.add('state-content-fadein');
+                isHomeButtonActive = true; // The morph is over, so flip the safety logic switch
             }, 1800);
         });
 
